@@ -38,7 +38,7 @@ python main.py
 
 Or build the `.exe' via **PyInstaller**:
 ```bash
-pyinstaller --onefile --noconsole --icon=list.ico --add-data "pages;pages" --name "Starto" --add-data "db.py;." --add-data "settings.py;" --add-data "StartoProgramData.sqlite3;." main.py
+pyinstaller --name "Starto" --onefile --noconsole --icon=list.ico --add-data "pages;pages" --add-data "db.py;." --add-data "settings.py;." --add-data "StartoProgramData.sqlite3;." main.py
 ```
 
 Or download a ready-made assembly
