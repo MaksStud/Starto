@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Створити групу</title>
+    <style>
+        :root {
+            --bg-dark: #2A2D3E;
+            --bg-card: #353A50;
+            --border-color: #4D5164;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9FA2B4;
+            --accent-blue: #5E72E4;
+            --accent-green: #2DCE89;
+            --accent-red: #F5365C;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        h2, h3 {
+            color: var(--text-primary);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px); /* Adjusting for padding */
+            padding: 12px 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        input[type="text"]::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .program-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .program-item span {
+            flex-grow: 1;
+            margin-right: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+            margin-right: 15px;
+        }
+        button:last-child {
+            margin-right: 0;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+        }
+        .btn-primary:hover {
+            background-color: #4b5edc;
+        }
+
+        .btn-cancel {
+            background-color: var(--text-secondary);
+        }
+        .btn-cancel:hover {
+            background-color: #7d808e;
+        }
+
+        .delete-btn {
+            background-color: var(--accent-red);
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-right: 0;
+        }
+        .delete-btn:hover {
+            background-color: #d82b4f;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Створити групу</h2>
+        <label for="group-name">Назва групи:</label>
+        <input type="text" id="group-name" placeholder="Введіть назву групи">
+
+        <div class="section">
+            <h3>Додати нові програми з комп'ютера:</h3>
+            <button class="btn-primary" onclick="addProgram()">Вибрати програму</button>
+            <ul id="added-programs"></ul>
+        </div>
+
+        <div class="section">
+            <button class="btn-primary" onclick="createGroup()">Зберегти</button>
+            <button class="btn-cancel" onclick="pywebview.api.back_to_main()">Скасувати</button>
+        </div>
+    </div>
+
+    <script>
+        async function addProgram() {
+            const result = await pywebview.api.select_program_file();
+            if (result) {
+                const ul = document.getElementById('added-programs');
+                const existingPrograms = Array.from(ul.children);
+                
+                // Перевіряємо, чи програма з таким шляхом вже додана
+                const isDuplicate = existingPrograms.some(item => item.dataset.path === result.path);
+
+                if (isDuplicate) {
+                    alert('Ця програма вже додана до списку.');
+                    return; // Зупиняємо виконання, якщо програма вже існує
+                }
+
+                const li = document.createElement('li');
+                li.className = 'program-item';
+                li.innerHTML = `<span>${result.name} (${result.path})</span> <button class="delete-btn" onclick="this.parentElement.remove()">Видалити</button>`;
+                li.dataset.name = result.name;
+                li.dataset.path = result.path;
+                ul.appendChild(li);
+            }
+        }
+
+        async function createGroup() {
+            const name = document.getElementById('group-name').value;
+            
+            const added = Array.from(document.querySelectorAll('#added-programs li'))
+                .map(li => ({
+                    name: li.dataset.name,
+                    path: li.dataset.path
+                }));
+            
+            try {
+                if (name.trim() === "") {
+                    alert("Будь ласка, введіть назву групи.");
+                    return;
+                }
+                
+                if (added.length === 0) { // Використовуємо === 0 для перевірки, що список пустий
+                    alert("Будь ласка, додайте хоча б одну програму.");
+                    return; 
+                }
+                
+                await pywebview.api.create_group_with_custom_programs(name, added);
+                pywebview.api.back_to_main();
+            } catch (e) {
+                console.warn('Помилка виконання API:', e);
+                alert("Помилка при створенні групи: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

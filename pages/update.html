@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Змінити групу</title>
+    <style>
+        :root {
+            --bg-dark: #2A2D3E;
+            --bg-card: #353A50;
+            --border-color: #4D5164;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9FA2B4;
+            --accent-blue: #5E72E4;
+            --accent-green: #2DCE89;
+            --accent-red: #F5365C;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        h2, h3 {
+            color: var(--text-primary);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px); /* Adjusting for padding */
+            padding: 12px 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        input[type="text"]::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .program-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .program-item span {
+            flex-grow: 1;
+            margin-right: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+            margin-right: 15px;
+        }
+        button:last-child {
+            margin-right: 0;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+        }
+        .btn-primary:hover {
+            background-color: #4b5edc;
+        }
+
+        .btn-cancel {
+            background-color: var(--text-secondary); /* A neutral color for cancel */
+        }
+        .btn-cancel:hover {
+            background-color: #7d808e;
+        }
+
+        .delete-btn {
+            background-color: var(--accent-red);
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .delete-btn:hover {
+            background-color: #d82b4f;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Змінити групу</h2>
+        <input type="hidden" id="group-id">
+        <label for="group-name">Назва групи:</label>
+        <input type="text" id="group-name" placeholder="Введіть назву групи">
+
+        <div class="section">
+            <h3>Програми в групі:</h3>
+            <ul id="existing-programs">
+                </ul>
+            <hr style="border-color: var(--border-color); margin: 20px 0;">
+            <h3>Додати нові програми:</h3>
+            <button class="btn-primary" onclick="addProgram()">Вибрати програму</button>
+            <ul id="added-programs"></ul>
+        </div>
+
+        <div class="section">
+            <button class="btn-primary" onclick="saveChanges()">Зберегти зміни</button>
+            <button class="btn-cancel" onclick="pywebview.api.back_to_main()">Скасувати</button>
+        </div>
+    </div>
+
+    <script>
+        function loadGroupData(data) {
+            document.getElementById('group-id').value = data.id;
+            document.getElementById('group-name').value = data.name;
+            const ul = document.getElementById('existing-programs');
+            ul.innerHTML = '';
+            data.programs.forEach(program => {
+                const li = document.createElement('li');
+                li.className = 'program-item';
+                li.innerHTML = `<span>${program.name} (${program.path})</span> <button class="delete-btn" onclick="this.parentElement.remove()">Видалити</button>`;
+                li.dataset.name = program.name;
+                li.dataset.path = program.path;
+                ul.appendChild(li);
+            });
+        }
+
+        async function addProgram() {
+            const result = await pywebview.api.select_program_file();
+            if (result) {
+                // Збираємо всі програми зі списків "existing-programs" та "added-programs"
+                const allProgramItems = document.querySelectorAll('#existing-programs li, #added-programs li');
+                
+                // Перевіряємо, чи програма з таким шляхом вже додана
+                const isDuplicate = Array.from(allProgramItems).some(item => item.dataset.path === result.path);
+
+                if (isDuplicate) {
+                    alert('Ця програма вже додана до групи.');
+                    return; // Зупиняємо виконання, якщо програма вже існує
+                }
+
+                const ul = document.getElementById('added-programs');
+                const li = document.createElement('li');
+                li.className = 'program-item';
+                li.innerHTML = `<span>${result.name} (${result.path})</span> <button class="delete-btn" onclick="this.parentElement.remove()">Видалити</button>`;
+                li.dataset.name = result.name;
+                li.dataset.path = result.path;
+                ul.appendChild(li);
+            }
+        }
+
+        function saveChanges() {
+            const groupId = document.getElementById('group-id').value;
+            const name = document.getElementById('group-name').value;
+            
+            // Перевірка на порожню назву групи
+            if (name.trim() === "") {
+                alert("Будь ласка, введіть назву групи.");
+                return;
+            }
+
+            const allProgramItems = document.querySelectorAll('#existing-programs li, #added-programs li');
+            
+            const programs = Array.from(allProgramItems).map(li => ({
+                name: li.dataset.name,
+                path: li.dataset.path
+            }));
+
+            // Перевірка на наявність програм у групі
+            if (programs.length === 0) {
+                alert("Будь ласка, додайте хоча б одну програму до групи.");
+                return;
+            }
+            
+            pywebview.api.save_updated_group(groupId, name, programs);
+        }
+    </script>
+</body>
+</html>

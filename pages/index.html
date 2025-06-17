@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Групи програм</title>
+    <style>
+        :root {
+            --bg-dark: #2A2D3E;
+            --bg-card: #353A50;
+            --border-color: #4D5164;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9FA2B4;
+            --accent-blue: #5E72E4;
+            --accent-green: #2DCE89;
+            --accent-red: #F5365C;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            padding-top: 90px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-dark);
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .header .create-button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .header .create-button:hover {
+            background-color: #4b5edc;
+        }
+
+        .group {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column; /* Стандартно стовпчиком для адаптивності */
+            gap: 12px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        
+        .group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .group-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .group-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .group-programs {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;       /* Дозволяє переносити кнопки */
+            gap: 10px;             /* Відстань між кнопками */
+            justify-content: flex-end;
+        }
+
+        .actions button {
+            flex: 1 1 120px;      /* Однаковий розмір, але адаптивно */
+            min-width: 120px;     /* Мінімальна ширина кнопки */
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .actions button:hover {
+            opacity: 0.85;
+        }
+
+        .btn-run { background-color: var(--accent-green); }
+        .btn-edit { background-color: var(--accent-blue); }
+        .btn-delete { background-color: var(--accent-red); }
+
+        @media (min-width: 600px) {
+            .group {
+                flex-direction: row;          /* На великих екранах в рядок */
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Мої групи програм</h1>
+        <button class="create-button" onclick="pywebview.api.create_group()">Створити групу</button>
+    </div>
+
+    <div class="container">
+        <div class="group-list">
+            {{GROUPS}}
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete(groupId) {
+            if (confirm("Ви дійсно хочете видалити цю групу та всі її програми?")) {
+                pywebview.api.delete_group(groupId);
+            }
+        }
+    </script>
+</body>
+</html>
