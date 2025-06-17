@@ -42,6 +42,7 @@ pyinstaller --onefile --noconsole --icon=list.ico --add-data "pages;pages" --nam
 ```
 
 Or download a ready-made assembly
+[Завантажити Starto.exe for Windows](https://github.com/MaksStud/Starto/releases/download/v1.0.0/Starto.exe)
 
 ## How to use
 
