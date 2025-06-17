@@ -2,3 +2,6 @@ __pycache__
 .venv
 .flake8
 StartoProgramData.sqlite3
+build
+dist
+Starto.spec

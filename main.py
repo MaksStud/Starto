@@ -83,9 +83,10 @@ class API:
 
     def run_group(self, group_id):
         programs = self.db.get_programs_by_group(group_id)
+        print(programs)
         for program_name, path in programs:
             if path:
-                subprocess.Popen(f'"{path}"', shell=True)
+                subprocess.Popen(['start', '', path], shell=True)
 
     def read_html(self, path: str) -> str:
         with open(path, 'r', encoding='utf-8') as file:
