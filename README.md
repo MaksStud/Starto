@@ -18,8 +18,11 @@ This program allows you to create groups of programs and launch all the programs
 ## Installation
 
 1. Mount the repository:
-## bash
+
+``` bash
 git clone https://github.com/MaksStud/Starto.git
+```
+``` bash
 cd project-name
 ```
 
