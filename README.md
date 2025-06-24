@@ -42,7 +42,7 @@ pyinstaller --name "Starto" --onefile --noconsole --icon=list.ico --add-data "pa
 ```
 
 Or download a ready-made assembly
-* [Starto.exe for Windows](https://github.com/MaksStud/Starto/releases/download/v1.0.0/Starto.exe)
+* [Starto.exe for Windows](https://github.com/MaksStud/Starto/releases/download/v1.0.1/Starto.exe)
 
 ## How to use
 
