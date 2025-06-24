@@ -2,6 +2,7 @@ import os
 import webview
 import subprocess
 import sys
+import win32com.client
 
 import settings
 
@@ -103,6 +104,22 @@ class API:
         self.db.update_group(group_id, name, programs)
         self.back_to_main()
 
+    def add_to_startup(self):
+        startup_path = os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs\Startup")
+
+        shortcut_path = os.path.join(startup_path, "Starto.lnk")
+        script_path = os.path.abspath(sys.argv[0])
+
+        if getattr(sys, 'frozen', False):
+            script_path = sys.executable
+
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(shortcut_path)
+        shortcut.Targetpath = script_path
+        shortcut.WorkingDirectory = os.path.dirname(script_path)
+        shortcut.IconLocation = script_path
+        shortcut.save()
+
 
 def resource_path(relative_path):
     try:
@@ -114,5 +131,6 @@ def resource_path(relative_path):
 
 if __name__ == '__main__':
     api = API()
-    window = webview.create_window("Групи програм", html=api.get_main_html(), js_api=api)
+    api.add_to_startup()
+    window = webview.create_window("Starto", html=api.get_main_html(), js_api=api)
     webview.start()
